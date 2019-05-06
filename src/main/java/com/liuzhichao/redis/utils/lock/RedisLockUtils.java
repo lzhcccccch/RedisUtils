@@ -20,12 +20,12 @@ public class RedisLockUtils {
 	/**
 	 * 锁过期时间,精确到毫秒
 	 */
-	@Value("${edw.sdp.redis.timeoutMsecs}")
+	@Value("${edw.sdp.spring.redis.timeoutMsecs}")
 	private String timeoutMsecs;
 	/**
 	 * 锁后缀
 	 */
-	@Value("${edw.sdp.redis.lockSuf}")
+	@Value("${edw.sdp.spring.redis.lockSuf}")
 	private String lockSuf;
 
 	/**
@@ -34,12 +34,15 @@ public class RedisLockUtils {
 	 * @return
 	 */
 	public synchronized boolean lock(String lockKey) {
+		System.out.println("配置文件中的默认超时时间:"+this.timeoutMsecs);
+		this.timeoutMsecs = String.valueOf(Long.parseLong(this.timeoutMsecs)+System.currentTimeMillis());
 		return this.lock(lockKey, this.timeoutMsecs);
 	}
 
 	public synchronized boolean lock(String lockKey, String timeoutMsecs) {
 		//超时时间早于当前时间,不能加锁
 		if ( Long.parseLong(timeoutMsecs) < System.currentTimeMillis() ) {
+			System.out.println("超时时间早于当前时间");
 			return false;
 		}
 		lockKey = lockKey + lockSuf;
@@ -48,9 +51,10 @@ public class RedisLockUtils {
 			return true;
 		}
 		String currentValue = (String) stringredisTemplate.opsForValue().get(lockKey);
+		System.out.println("原锁的值:"+currentValue);
 		if ( !StringUtils.isEmpty(currentValue) && Long.parseLong(currentValue) < System.currentTimeMillis() ) {
 			String oldValue = (String) stringredisTemplate.opsForValue().getAndSet(lockKey, timeout);
-			if (oldValue != null && oldValue.equals(currentValue)) {
+			if ( !StringUtils.isEmpty(oldValue) && oldValue.equals(currentValue)) {
 				return true;
 			}
 		}
@@ -68,7 +72,8 @@ public class RedisLockUtils {
 	 * 解锁
 	 */
 	public synchronized void unlock(String lockKey) {
-		this.lock(lockKey, this.timeoutMsecs);
+		String timeoutMsecs = String.valueOf(Long.parseLong(this.timeoutMsecs)+System.currentTimeMillis());
+		this.unlock(lockKey, timeoutMsecs);
 	}
 	
 	/**
