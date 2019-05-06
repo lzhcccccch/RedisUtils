@@ -9,7 +9,8 @@ import org.springframework.util.StringUtils;
 /**
  * @author 刘志超
  * @date 2019-04-19 下午4:07:00
- * @version 类说明 Redis锁
+ * @version 
+ * 类说明 	Redis锁
  */
 @Component
 public class RedisLockUtils {
