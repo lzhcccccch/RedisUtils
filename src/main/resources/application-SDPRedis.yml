@@ -1,21 +1,26 @@
-spring:
-  redis:
-    cluster:
-      nodes: 11.11.160.68:6379,11.11.160.68:6381,11.11.160.75:6383
-      max-redirects: 10
-    password:
-    timeout: 0
-    jedis:
-      pool:
-        max-active: -1
-        max-wait: -1
-        max-idle: 10
-        min-idle: 3 
-
-      
-
 edw: 
   sdp:
-    redis: 
-     timeoutMsecs: 10000
-     lockSuf: _redis_lock
+    spring:
+      redis:
+        isCluster: true #是否开启集群模式,false为单机
+        cluster:
+          nodes: 11.11.160.68:6379,11.11.160.68:6381,11.11.160.75:6383
+          max-redirects: 10
+        hostName: 11.11.160.68
+        port: 6379
+        password:
+        timeout: 0
+        jedis:
+          pool:
+            max-active: -1 #最大连接数,-1不限制
+            max-wait: -1 #最大阻塞等待时间,-1不限制
+            max-idle: 10 #最大空闲连接
+            min-idle: 3 #最小的空闲连接
+            minEvictableIdleTimeMillis: 1800000 #连接的最小空闲时间
+            numTestsPerEvictionRun: 3 #每次释放连接的最大数
+            timeBetweenEvictionRunsMillis: -1 #逐出扫描的时间间隔,如果为负数,则不运行逐出线程
+            testOnBorrow: true #是否从池中取出链接前进行检验,如果校验失败,则从池中去除链接并尝试取出另一个
+            testWhileIdle: true #在空闲时检查有效性,默认false
+        timeoutMsecs: 10000
+        lockSuf: _redis_lock
+        
